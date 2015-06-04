@@ -41,7 +41,9 @@ import (
 	"github.com/prometheus/prometheus/storage/remote/influxdb"
 	"github.com/prometheus/prometheus/storage/remote/opentsdb"
 	"github.com/prometheus/prometheus/web"
-	"github.com/prometheus/prometheus/web/api"
+
+	legacy "github.com/prometheus/prometheus/web/api/legacy"
+	v1 "github.com/prometheus/prometheus/web/api/v1"
 )
 
 const deletionBatchSize = 100
@@ -184,8 +186,13 @@ func NewPrometheus() *prometheus {
 		PathPrefix: *pathPrefix,
 	}
 
-	metricsService := &api.MetricsService{
+	apiLegacy := &legacy.API{
 		Now:         clientmodel.Now,
+		Storage:     memStorage,
+		QueryEngine: queryEngine,
+	}
+
+	apiv1 := &v1.API{
 		Storage:     memStorage,
 		QueryEngine: queryEngine,
 	}
@@ -193,7 +200,8 @@ func NewPrometheus() *prometheus {
 	webService := web.NewWebService(&web.WebServiceOptions{
 		PathPrefix:      *pathPrefix,
 		StatusHandler:   prometheusStatus,
-		MetricsHandler:  metricsService,
+		APILegacy:       apiLegacy,
+		APIv1:           apiv1,
 		ConsolesHandler: consolesHandler,
 		AlertsHandler:   alertsHandler,
 		GraphsHandler:   graphsHandler,

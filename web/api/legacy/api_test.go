@@ -93,13 +93,13 @@ func TestQuery(t *testing.T) {
 	})
 	storage.WaitForIndexing()
 
-	api := MetricsService{
+	api := &API{
 		Now:         testNow,
 		Storage:     storage,
 		QueryEngine: promql.NewEngine(storage),
 	}
 	rtr := route.New()
-	api.RegisterHandler(rtr.WithPrefix("/api"))
+	api.Register(rtr.WithPrefix("/api"))
 
 	server := httptest.NewServer(rtr)
 	defer server.Close()
